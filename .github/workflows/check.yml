@@ -1,0 +1,23 @@
+name: Check skills
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Check repository and examples
+        run: |
+          python3 scripts/validate-skills.py
+          python3 skills/research-lab-notebook/scripts/validate-notebook.py --self-test
+          python3 -B -m unittest discover -s tests
+          python3 skills/research-lab-notebook/scripts/validate-notebook.py --strict examples/gradient-accumulation
+          python3 -B examples/gradient-accumulation/scripts/simulate.py --condition true-batch --seed 1
+      - name: Validate Agent Skills specification
+        run: |
+          uvx --from skills-ref agentskills validate skills/research-lab-notebook
+          uvx --from skills-ref agentskills validate skills/download-research-references

@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "backend": "slurm",
+  "job_id": "48152",
+  "experiment_id": "EXP-001",
+  "terminal_status": "succeeded",
+  "processed_at": "2026-08-13T15:20:00Z",
+  "evidence": [
+    "experiments/EXP-001-accumulation-pilot.md"
+  ],
+  "artifacts": [
+    {
+      "uri": "results/EXP-001/48152/metrics.json",
+      "sha256": "synthetic-not-a-content-digest"
+    }
+  ],
+  "notebook_revision": "synthetic-evidence-48152",
+  "notes": "Fictional pilot result incorporated."
+}

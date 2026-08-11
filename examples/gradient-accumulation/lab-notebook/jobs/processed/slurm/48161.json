@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "backend": "slurm",
+  "job_id": "48161",
+  "experiment_id": "EXP-002",
+  "terminal_status": "succeeded",
+  "processed_at": "2026-08-16T16:45:00Z",
+  "evidence": [
+    "experiments/EXP-002-accumulation-comparison.md",
+    "findings/2026-08-16-accumulation-matches-large-batch.md"
+  ],
+  "artifacts": [
+    {
+      "uri": "results/EXP-002/48161/metrics.json",
+      "sha256": "synthetic-not-a-content-digest"
+    }
+  ],
+  "notebook_revision": "synthetic-evidence-48161",
+  "notes": "Fictional comparison and synthesis incorporated."
+}

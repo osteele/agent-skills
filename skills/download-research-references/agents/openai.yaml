@@ -1,0 +1,4 @@
+interface:
+  display_name: "Download Research References"
+  short_description: "Archive cited open-access papers locally"
+  default_prompt: "Use $download-research-references to archive the papers cited by this draft into the notebook references directory."
