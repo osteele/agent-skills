@@ -17,8 +17,10 @@ SOURCE = (
     / "notebook-schema.json"
 )
 SITE_SCHEMA = Path("src/data/research-lab-notebook-schema.json")
-SITE_REFERENCE = Path(
-    "src/pages/reference/research-lab-notebook/reference/index.astro"
+SITE_PAGES = (
+    Path("src/pages/reference/research-lab-notebook/reference/index.astro"),
+    Path("src/pages/reference/research-lab-notebook/experiments/index.astro"),
+    Path("src/pages/reference/research-lab-notebook/plans/index.astro"),
 )
 
 
@@ -34,10 +36,18 @@ def main() -> int:
         print(f"ERROR: {site_schema_path} differs from {SOURCE}")
         return 1
 
-    reference_path = args.site.resolve() / SITE_REFERENCE
-    reference = reference_path.read_text(encoding="utf-8")
+    rendered = ""
+    for relative in SITE_PAGES:
+        page = args.site.resolve() / relative
+        if not page.is_file():
+            print(f"ERROR: {page} is missing")
+            return 1
+        text = page.read_text(encoding="utf-8")
+        if "import notebookSchema" not in text:
+            print(f"ERROR: {page} does not import the schema")
+            return 1
+        rendered += text
     expected_fragments = (
-        "import notebookSchema",
         "notebookSchema.required_files",
         "notebookSchema.experiment_statuses",
         "notebookSchema.experiment_status_aliases",
@@ -45,6 +55,7 @@ def main() -> int:
         "notebookSchema.experiment.estimand.registration_values",
         "notebookSchema.plan.required_frontmatter",
         "notebookSchema.plan.status_directories",
+        "notebookSchema.plan.status_aliases",
         "notebookSchema.plan.completion_report.recognized_headings",
         "notebookSchema.plan.confirmation_reserve.required_markers",
         "notebookSchema.claim.columns",
@@ -52,9 +63,9 @@ def main() -> int:
         "notebookSchema.human_review.checkpoints",
         "notebookSchema.ledger.required_fields",
     )
-    missing = [fragment for fragment in expected_fragments if fragment not in reference]
+    missing = [fragment for fragment in expected_fragments if fragment not in rendered]
     if missing:
-        print(f"ERROR: {reference_path} does not render: {', '.join(missing)}")
+        print(f"ERROR: the notebook pages do not render: {', '.join(missing)}")
         return 1
     print("Published notebook contract matches the skill schema")
     return 0
