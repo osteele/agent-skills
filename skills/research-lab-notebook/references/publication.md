@@ -17,7 +17,8 @@ contains the stable key for the paper that uses the claim. Keep venue,
 readiness, deadline, and submission state out of this table.
 
 Allowed statuses: `supported`, `provisional`, `blocked`, `refuted`, `retired`.
-Every row must cite at least one experiment record. A finding may also be cited
+`live` and `withdrawn` are accepted as legacy spellings of `supported` and
+`retired`, with a warning. Every row must cite at least one experiment record. A finding may also be cited
 when its synthesis, correction, or interpretation is needed to recover the
 claim, but it cannot replace experiment evidence. A paper section is an evidence
 consumer, not an evidence source.

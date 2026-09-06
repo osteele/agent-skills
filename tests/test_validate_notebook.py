@@ -259,6 +259,37 @@ class NotebookValidationTests(unittest.TestCase):
             ["Informed by link [[EXP-000-missing]] does not resolve to a notebook file"],
         )
 
+    def test_revision_letter_suffix_is_a_valid_id(self) -> None:
+        experiment = self.fixture.add_experiment("EXP-001b-synthetic-check.md")
+        experiment.write_text(
+            COMPLETED_EXPERIMENT.replace("# EXP-001:", "# EXP-001b:"),
+            encoding="utf-8",
+        )
+        (self.root / "CLAIMS.md").write_text(
+            """# Claims
+
+| ID | Role | Claim | Status | Evidence | Paper |
+|---|---|---|---|---|---|
+| C1 | major | Synthetic result | supported | [[EXP-001b]] | synthetic-paper |
+""",
+            encoding="utf-8",
+        )
+        self.assertEqual(self.messages(), [])
+
+    def test_hyphenated_preregistered_headings_are_accepted(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT.replace(
+                "## Preregistered predictions (a priori)",
+                "## Pre-registered predictions (a priori)",
+            ).replace(
+                "### Outcomes against preregistered predictions",
+                "### Outcomes against pre-registered predictions",
+            ),
+            encoding="utf-8",
+        )
+        self.assertEqual(self.messages(), [])
+
     def test_annex_is_not_an_experiment(self) -> None:
         self.fixture.add_experiment()
         annex = self.root / "experiments" / "EXP-001-synthetic-check.annex.md"
@@ -377,6 +408,23 @@ class NotebookValidationTests(unittest.TestCase):
         root, issues = validator.validate(self.root)
         self.assertEqual([issue.level for issue in issues], ["WARNING"])
         self.assertIn("EXP-001:E2 is a found estimand", issues[0].message)
+
+    def test_legacy_claim_status_spelling_warns(self) -> None:
+        self.fixture.add_experiment()
+        (self.root / "CLAIMS.md").write_text(
+            """# Claims
+
+| ID | Role | Claim | Status | Evidence | Paper |
+|---|---|---|---|---|---|
+| C1 | major | Synthetic result | live | [[EXP-001]] | synthetic-paper |
+""",
+            encoding="utf-8",
+        )
+        root, issues = validator.validate(self.root)
+        self.assertEqual(
+            [(issue.level, issue.message) for issue in issues],
+            [("WARNING", "line 5: legacy claim status spelling 'live'; write 'supported'")],
+        )
 
     def test_claim_requires_valid_role_and_paper_key(self) -> None:
         self.fixture.add_experiment()
@@ -544,6 +592,20 @@ class NotebookValidationTests(unittest.TestCase):
         self.assertIn("gated plan requires gate", messages)
         self.assertIn(
             "gated plan requires one of: revisit_when, promote_when", messages
+        )
+
+    def test_legacy_plan_status_spelling_warns_and_accepts_its_directory(self) -> None:
+        plans = self.root / "plans" / "complete"
+        plans.mkdir(parents=True)
+        terminal = PLAN.replace("status: active", "status: complete").replace(
+            "next_action: Run Phase 1", "next_action: none"
+        )
+        terminal += "\n## Outcome\n\nThe control passed.\n\n## Evidence\n\n- [[EXP-001]]\n"
+        (plans / "2026-08-11-synthetic-control.md").write_text(terminal, encoding="utf-8")
+        root, issues = validator.validate(self.root)
+        self.assertEqual(
+            [(issue.level, issue.message) for issue in issues],
+            [("WARNING", "legacy plan status spelling 'complete'; write 'completed'")],
         )
 
     def test_plan_status_must_match_directory(self) -> None:

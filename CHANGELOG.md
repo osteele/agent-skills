@@ -17,6 +17,12 @@ warnings or errors; each is listed here with the rule behind it.
   `canceled` are accepted as legacy spellings with a warning. `closed` is
   rejected because it means `abandoned` in some records and `completed` in
   others. A parenthesized qualifier may follow the status token.
+- An experiment ID may carry a revision-letter suffix (`EXP-045b`) for a
+  follow-up that is not a separate experiment.
+- The `Pre-registered predictions (a priori)` and `Outcomes against
+  pre-registered predictions` headings are accepted with or without the hyphen.
+- Plan status `complete` (in `plans/complete/`) and claim status `live` are
+  accepted as legacy spellings of `completed` and `supported`, with a warning.
 - Analysis annexes (`EXP-NNN-topic.annex.md`) hold breakdown tables beside an
   experiment. They carry no status, are not indexed, and must name an existing
   experiment ID.

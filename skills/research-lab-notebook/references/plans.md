@@ -50,7 +50,9 @@ Statuses are `draft`, `active`, `blocked`, `gated`, `backlog`, `superseded`,
 `completed`, and `abandoned`. Use a filename of the form
 `YYYY-MM-DD-lowercase-topic.md`, where the date is the creation date. Active
 plans live directly under `plans/`. Other plans live in the subdirectory named
-for their status.
+for their status. `complete` (with a `plans/complete/` directory) and
+`proposed` are accepted as legacy spellings of `completed` and `draft`, with a
+warning.
 
 Status-specific fields preserve why work is waiting or ended:
 

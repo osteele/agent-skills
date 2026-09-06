@@ -33,13 +33,13 @@ WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
 QUESTION_ID_RE = re.compile(r"^RQ\d+$", re.IGNORECASE)
 STATUS_RE = re.compile(r"^\*\*Status\*\*:\s*([a-z-]+)", re.MULTILINE)
 DATE_RE = re.compile(r"^\*\*Date\*\*:\s*(\d{4}-\d{2}-\d{2})", re.MULTILINE)
-HEADING_ID_RE = re.compile(r"^#\s+([A-Z][A-Z0-9]*-[A-Z0-9]+)\s*:", re.MULTILINE)
-FILE_ID_RE = re.compile(r"^([A-Z][A-Z0-9]*-[A-Z0-9]+)(?:-|\.md$)")
-EXPERIMENT_ID_RE = re.compile(r"^[A-Z][A-Z0-9]*-[A-Z0-9]+$")
+HEADING_ID_RE = re.compile(r"^#\s+([A-Z][A-Z0-9]*-[A-Z0-9]+[a-z]?)\s*:", re.MULTILINE)
+FILE_ID_RE = re.compile(r"^([A-Z][A-Z0-9]*-[A-Z0-9]+[a-z]?)(?:-|\.md$)")
+EXPERIMENT_ID_RE = re.compile(SCHEMA["experiment_id"]["pattern"])
 FINDING_FILE_RE = re.compile(r"^(\d{4}-\d{2}-\d{2})-[a-z0-9]+(?:-[a-z0-9]+)*\.md$")
 PLAN_FILE_RE = FINDING_FILE_RE
 BACKEND_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-EXPERIMENT_REF_RE = re.compile(r"\b[A-Z][A-Z0-9]*-[A-Z0-9]+\b")
+EXPERIMENT_REF_RE = re.compile(r"\b[A-Z][A-Z0-9]*-[A-Z0-9]+[a-z]?\b")
 CLAIM_ID_RE = re.compile(r"^C\d+$", re.IGNORECASE)
 CLAIM_EXPERIMENT_PATH_RE = re.compile(
     r"(?i)(?:(?:lab-notebook/)?experiments/)[A-Za-z0-9_./-]+\.md"
@@ -89,14 +89,19 @@ def read_text(path: Path, issues: list[Issue]) -> str | None:
     return None
 
 
+def heading_pattern(heading: str) -> str:
+    """Escape a heading for matching; "preregistered" also matches the hyphenated spelling."""
+    return re.sub(r"(?i)(pre)(registered)", r"\1-?\2", re.escape(heading))
+
+
 def has_heading(text: str, heading: str, ignore_case: bool = False) -> bool:
     flags = re.MULTILINE | (re.IGNORECASE if ignore_case else 0)
-    return re.search(rf"^#+\s+{re.escape(heading)}\s*$", text, flags) is not None
+    return re.search(rf"^#+\s+{heading_pattern(heading)}\s*$", text, flags) is not None
 
 
 def section_body(text: str, heading: str) -> str | None:
     """Return the text under a heading, up to the next heading of equal or higher level."""
-    match = re.search(rf"^(#+)\s+{re.escape(heading)}\s*$", text, re.MULTILINE)
+    match = re.search(rf"^(#+)\s+{heading_pattern(heading)}\s*$", text, re.MULTILINE)
     if match is None:
         return None
     level = len(match.group(1))
@@ -480,7 +485,12 @@ def validate_claims(root: Path, issues: list[Issue]) -> None:
             issues.append(Issue("ERROR", path, f"line {line_number}: invalid claim role {role!r}"))
         if not claim:
             issues.append(Issue("ERROR", path, f"line {line_number}: claim text is empty"))
-        if status not in SCHEMA["claim"]["statuses"]:
+        if status in SCHEMA["claim"]["status_aliases"]:
+            canonical = SCHEMA["claim"]["status_aliases"][status]
+            issues.append(
+                Issue("WARNING", path, f"line {line_number}: legacy claim status spelling {status!r}; write {canonical!r}")
+            )
+        elif status not in SCHEMA["claim"]["statuses"]:
             issues.append(Issue("ERROR", path, f"line {line_number}: invalid claim status {status!r}"))
         if not paper:
             issues.append(Issue("ERROR", path, f"line {line_number}: paper key is empty"))
@@ -586,11 +596,18 @@ def validate_plans(root: Path, issues: list[Issue]) -> None:
                 Issue("ERROR", path, f"missing frontmatter: {', '.join(missing)}")
             )
         status = metadata.get("status", "")
-        if status not in plan_schema["statuses"]:
+        written_status = status
+        if status in plan_schema["status_aliases"]:
+            status = plan_schema["status_aliases"][status]
+            issues.append(
+                Issue("WARNING", path, f"legacy plan status spelling {written_status!r}; write {status!r}")
+            )
+        elif status not in plan_schema["statuses"]:
             issues.append(Issue("ERROR", path, f"unknown plan status {status!r}"))
         expected_dir = plan_schema["status_directories"].get(status)
         actual_dir = "." if relative.parent == Path(".") else relative.parts[0]
-        if expected_dir is not None and actual_dir != expected_dir:
+        accepted_dirs = {expected_dir, written_status if expected_dir not in (None, ".") else expected_dir}
+        if expected_dir is not None and actual_dir not in accepted_dirs:
             issues.append(
                 Issue("ERROR", path, f"status {status!r} belongs in {expected_dir}/")
             )

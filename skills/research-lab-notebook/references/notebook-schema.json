@@ -29,8 +29,8 @@
     "closed": "means abandoned in some records and completed in others; write the one that applies"
   },
   "experiment_id": {
-    "pattern": "^[A-Z][A-Z0-9]*-[A-Z0-9]+$",
-    "examples": ["EXP-001", "ACC-E1"]
+    "pattern": "^[A-Z][A-Z0-9]*-[A-Z0-9]+[a-z]?$",
+    "examples": ["EXP-001", "ACC-E1", "EXP-045b"]
   },
   "experiment": {
     "annex_suffix": ".annex.md",
@@ -52,13 +52,15 @@
     "columns": ["ID", "Role", "Claim", "Status", "Evidence", "Paper"],
     "roles": ["major", "candidate major", "supporting"],
     "statuses": ["supported", "provisional", "blocked", "refuted", "retired"],
+    "status_aliases": {"live": "supported", "withdrawn": "retired"},
     "evidence_requires_experiment": true,
     "paper_required": true,
     "promotion_requires_human_review": true,
-    "estimand_reference_pattern": "\\b([A-Z][A-Z0-9]*-[A-Z0-9]+):(E\\d+)\\b"
+    "estimand_reference_pattern": "\\b([A-Z][A-Z0-9]*-[A-Z0-9]+[a-z]?):(E\\d+)\\b"
   },
   "plan": {
     "statuses": ["draft", "active", "blocked", "gated", "backlog", "superseded", "completed", "abandoned"],
+    "status_aliases": {"complete": "completed", "proposed": "draft"},
     "terminal_statuses": ["superseded", "completed", "abandoned"],
     "required_frontmatter": ["status", "summary", "next_action", "created", "updated"],
     "optional_frontmatter": [
