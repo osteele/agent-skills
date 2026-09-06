@@ -10,9 +10,10 @@ This repository packages the system as portable [Agent
 Skills](https://agentskills.io). The skills work with different coding agents,
 compute clusters, and job services.
 
-Current documented contract: [`v0.1.0`](https://github.com/osteele/agent-skills/releases/tag/v0.1.0).
+Current documented contract: [`v0.2.0`](https://github.com/osteele/agent-skills/releases/tag/v0.2.0).
 The [guide and reference](https://notes.osteele.com/reference/research-lab-notebook/)
-show the notebook structure and workflows.
+show the notebook structure and workflows. Changes between releases are listed
+in [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
@@ -141,9 +142,12 @@ The directories separate records with different lifecycles:
 | `kb/` | Stable methodology, terminology, comparisons, and other reusable project knowledge. | Material should be maintained as reference, not evidence |
 | `causal-models/` | Working mechanism hypotheses kept distinct from observed findings. | Several interventions inform one mechanism hypothesis |
 
-Each experiment keeps its a priori predictions next to observed outcomes. The
-record makes exploratory and confirmatory work distinguishable and gives later
-agent sessions the decision context that would otherwise disappear.
+Each experiment keeps its a priori predictions next to observed outcomes, and
+names each quantity it measures as an estimand whose registration status is
+`registered`, `found`, or `gate`. A claim cites the estimand (`EXP-002:E1`),
+so a claim resting on a found result is visibly a found result. The record
+makes exploratory and confirmatory work distinguishable and gives later agent
+sessions the decision context that would otherwise disappear.
 
 ### An example notebook
 
@@ -160,14 +164,18 @@ plans/completed/2026-08-12-accumulation-controls.md
   Phase 2: three seeds for true-batch and accumulated-batch conditions
 
 experiments/EXP-001-accumulation-pilot.md
+  E1 registered: loss difference at seed 1, threshold 0.02; E2 is a finiteness gate
   Prediction written before the run: final validation loss differs by < 0.02
   Run: slurm/48152; artifact: results/EXP-001/metrics.json
 
 findings/2026-08-16-accumulation-matches-large-batch.md
   Synthesis across EXP-001 and EXP-002, with effect sizes and scope limits
 
+plans/completed/2026-08-12-accumulation-controls.md
+  Completion report: both goals met, limited to the deterministic simulator
+
 CLAIMS.md
-  C1 major, gradient-accumulation-note: accumulation matches true batches in the toy simulator
+  C1 major, gradient-accumulation-note: cites EXP-001:E1, EXP-002:E1, EXP-002:E2
 ```
 
 Each file owns one part of the argument. The plan coordinates the work, the

@@ -61,13 +61,30 @@ Status-specific fields preserve why work is waiting or ended:
 | `superseded` | `superseded_by` |
 | `abandoned` | `abandoned_because` |
 
+A gate is a testable external blocker: data, compute, a dependency, a
+collaborator decision. "The user decides to run it" is not a gate. A plan that
+is viable and waiting for someone to start it is `backlog` with a revisit
+cadence.
+
 `next_action` is a handoff pointer, not a task queue. Keep it bounded and update
 it only after the owning phase's evidence and disposition are durable. It must
-be non-empty for a nonterminal plan. Set it to an empty value or `none` when the
-status is `superseded`, `completed`, or `abandoned`.
+be non-empty for a nonterminal plan. Set it to an empty value, `none`, or
+`null` when the status is `superseded`, `completed`, or `abandoned`.
 
-`superseded`, `completed`, and `abandoned` are terminal. Set their
-`next_action` to an empty value, `none`, or `null`.
+### Completed versus abandoned
+
+The distinction turns on whether the work was done, not on whether the answer
+was welcome. A plan that ran its course and returned a negative result is
+`completed`: the campaign answered its question, and the answer was no. A plan
+whose own negative gate fired as designed is the clearest case, since the gate
+firing is the experiment working. Reserve `abandoned` for plans that never got
+their answer: the premise changed, the question stopped mattering, or the work
+was judged not worth doing.
+
+Filing a completed negative as `abandoned` has a cost. It reads to the next
+person as "this was a mistake" rather than "this question is settled", so the
+direction gets re-proposed by someone who cannot tell it was already closed by
+evidence. Negative results are results; file them where they will be found.
 
 ## Body
 
@@ -107,8 +124,9 @@ Scientific, operational, cost, and data-loss risks.
 ```
 
 Every plan requires `Objective`, `Existing evidence`, `Phases`, `Risks and
-controls`, and `Terminal conditions`. A completed or abandoned plan also
-requires:
+controls`, and `Terminal conditions`. Terminal plans add closing sections: a
+completed plan carries a completion report and `## Evidence`; a superseded or
+abandoned plan carries `## Disposition` and `## Evidence`.
 
 ```markdown
 ## Disposition
@@ -119,6 +137,104 @@ Why the plan ended and which terminal condition applied.
 
 Links to the experiments, findings, claims, and revisions that support closure.
 ```
+
+## Confirmation reserve
+
+A plan that will end in a confirmatory claim carries a `## Confirmation
+reserve` section, written at plan creation and before any exploration. It
+names the evidence the plan is holding back and the rule that will judge it:
+
+```markdown
+## Confirmation reserve
+
+**Held back:** seeds 7 and 11; eval tasks 40 to 60 of the held-out split
+
+**Decision rule:** accept if reserve accuracy beats the baseline by more
+than 2pp on the preregistered metric
+```
+
+Both markers are required, and the validator rejects a section carrying only
+one. A reserve that names what is held back but not how it will be judged
+leaves the rule to be written once the numbers are known, which is the failure
+the reserve exists to prevent.
+
+This is the one plan record that cannot be written later. Everything else in a
+plan can be reconstructed from evidence that already exists; a reserve created
+after exploration is not a reserve. Commit the section as soon as it exists so
+version control fixes its date. Omit the section for plans that make no
+confirmatory claim; an empty declaration is not a declaration.
+
+## Completion report
+
+A plan that reaches `completed` carries a `## Completion report` section,
+written by the executing session before the terminal status is set. It is the
+persisted form of the final handoff, so the summary survives the session. It
+states:
+
+- the terminal disposition and the evidence that caused it;
+- per-goal outcomes (met, unmet, void), each linking the experiment or finding
+  that carries the result;
+- limitations and instrument caveats worth a future reader's attention;
+- follow-ups left on the table, naming the successor plan when one exists;
+- job and artifact status at closure.
+
+Canonical numbers and interpretation still live in `experiments/` and
+`findings/`; the report links them rather than restating them. A terminal
+plan's report may run to a page, because it is the record a later reader uses
+to decide whether the question is settled.
+
+Write the heading exactly as `## Completion report`. Notebooks that predate
+the convention record the same thing under other names, and the validator
+recognizes those rather than requiring a rename: `Completion`, `Completion
+note`, `Completion audit`, `Outcome`, `Execution outcome`, `Execution result`,
+`Closed`, and `Disposition`. Matching is on the exact heading, case
+insensitively, never on a keyword. `## Completion gates` and `## Outcome tree`
+are prospective sections that belong in an open plan, and one word separates
+them from their retrospective counterparts.
+
+Do not rename an old heading into the prescribed spelling to make it match.
+The rename asserts that the section states a terminal disposition, per-goal
+outcomes, caveats, and follow-ups, which is a claim about text nobody has
+re-read. Recognizing the heading costs nothing and claims nothing.
+
+Do not compose findings the plan does not record. Where the recorded outcome
+is too thin to promote into a report, inventory the plan for a decision
+instead: abandon the follow-up, move the plan back from `completed`, or write
+the report from the records it names, one plan at a time.
+
+## Retraction notices on terminal plans
+
+A completed plan is terminal, but the experiments it cites are not. When an
+experiment record later corrects a result the plan stated as its outcome, the
+plan keeps asserting the superseded value to every future reader. Nothing in
+the frontmatter marks it, since `superseded_by` is for a plan replaced by
+another plan.
+
+Record a retraction notice directly beneath the affected passage, leaving the
+original text untouched:
+
+```markdown
+> **Retracted YYYY-MM-DD.** EXP-NNN supersedes the figures above: mean 0.996,
+> range 0.009 (was mean 0.987, range 0.031). The narrow-spread reading is
+> withdrawn. Applied YYYY-MM-DD.
+```
+
+Four rules:
+
+- **Annotate, never rewrite.** The original claim stays verbatim. Editing the
+  numbers out destroys the record of what was believed and when.
+- **Point, do not restate.** Corrected values and citations only. A notice that
+  paraphrases the correction becomes a second claim to verify.
+- **Apply, do not assume.** Write the notice when a correction is acted on,
+  not when it is reported. A review finding can be wrong.
+- **State the superseded values, then sweep.** The experiment that retracts
+  writes the new value beside the old one, and the same session searches the
+  notebook for the superseded values and the experiment ID, annotating whatever
+  it finds.
+
+Notebook edges point forward: a plan names its experiments, and a search for
+the experiment ID is the computed reverse. At the moment a correction is
+recorded, nothing asks who relied on the old value unless the sweep does.
 
 ## Execution boundary
 
@@ -141,8 +257,9 @@ job IDs and outputs in experiment files, updates the plan's status and
 The plan coordinates evidence production. Experiments and findings own the
 evidence.
 
-When the plan reaches a terminal state, write the disposition and evidence,
-update indexes and pointers, then remove it from active queues.
+When the plan reaches a terminal state, write the completion report or
+disposition and the evidence, update indexes and pointers, then remove it from
+active queues.
 
 Regenerate and validate the plan index with:
 

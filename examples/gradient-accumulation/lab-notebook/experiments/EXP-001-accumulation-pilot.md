@@ -17,10 +17,28 @@ by less than 0.02 at seed 1.
 - **Revision**: `synthetic-code-v1`
 - **Key command**: `python3 scripts/simulate.py --condition <condition> --seed 1`
 
+## Estimands
+
+### E1 Pilot loss difference
+
+**Registration**: registered. The statistic is the absolute final-validation-loss
+difference at seed 1; the threshold is 0.02; a difference at or above it fails P2.
+
+### E2 Finite output
+
+**Registration**: gate. Both conditions must report finite loss before E1 can be read.
+
+## Informed by
+
+- [[RQ1]]
+- [[2026-08-12-accumulation-controls]]
+
+No run had been observed before this design was fixed.
+
 ## Preregistered predictions (a priori)
 
-- **P1: Finite output**: both conditions report finite loss.
-- **P2: Pilot equivalence**: absolute loss difference is below 0.02.
+- **P1: Finite output (E2)**: both conditions report finite loss.
+- **P2: Pilot equivalence (E1)**: absolute loss difference is below 0.02.
 
 ## Decision rule (a priori)
 

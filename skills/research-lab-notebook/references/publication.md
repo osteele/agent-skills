@@ -22,6 +22,12 @@ when its synthesis, correction, or interpretation is needed to recover the
 claim, but it cannot replace experiment evidence. A paper section is an evidence
 consumer, not an evidence source.
 
+Cite the estimand, not only the record, when the experiment declares one:
+`EXP-004:E1`. The validator resolves the reference and warns when the claim
+draws on a `found` estimand (the claim is then a found result and must say so)
+or on a `gate` (a precondition, not a result). See
+[Experiments](experiments.md) for the registration grammar.
+
 If a claim depends on an analysis that no experiment owns, create an analysis
 experiment. Name its input experiments, method or script, artifacts, and result.
 Label backfilled expectations as retrospective rather than preregistered.
@@ -75,6 +81,22 @@ The named claim IDs followed by concrete evidence links.
 Verify current venue facts from primary sources before recording them. Include
 the source and date checked. Remove resolved blocking items. Version control
 already preserves their history.
+
+### Dates are external
+
+Every date in a publication record is a venue's own published deadline,
+traceable to its source. Internal target dates are not recorded. A reader who
+finds invented dates beside genuine ones has to check each one, so fabricated
+dates cost the genuine ones their authority. Where work needs to be parked
+with urgency rather than scheduled, three fields carry it:
+
+- **Urgency**: how strongly the work is urged, with the reason. An ordering
+  claim on the next free capacity, not a promise.
+- **Gate**: the condition that releases it, observable by a reader of the
+  records ("when the coverage check lands"), never a date.
+- **Ready since**: the date readiness was marked. A reader derives staleness
+  from it ("ready since 2026-08-06, still unposted") without anyone inventing
+  a target.
 
 Keep paper prose in the paper draft, next actions in `PRIORITIES.md`, and result
 details in experiments or findings.

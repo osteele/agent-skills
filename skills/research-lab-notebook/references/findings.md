@@ -52,5 +52,12 @@ Do not silently revise a dated finding when later evidence changes the claim.
 Create a new finding that links to and supersedes the earlier one, or add a short
 correction pointer if the original statement is factually wrong.
 
+When the correction originates in an experiment record, that record states
+the superseded values next to the new ones, and the session applying the
+correction searches the notebook for both the old values and the experiment ID.
+A finding found by that sweep gets its pointer or successor in the same
+session. A terminal plan found by it gets a retraction notice; see
+[Plans](plans.md).
+
 Update `findings/README.md`, the research question, and any affected claim after
 adding a finding.

@@ -17,8 +17,20 @@ SCHEMA_PATH = Path(__file__).resolve().parent.parent / "references" / "notebook-
 SCHEMA = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 REQUIRED_FILES = tuple(SCHEMA["required_files"])
 STATUSES = set(SCHEMA["experiment_statuses"])
+STATUS_ALIASES = dict(SCHEMA["experiment_status_aliases"])
+REJECTED_STATUSES = dict(SCHEMA["rejected_experiment_statuses"])
 FINDING_STATUSES = set(SCHEMA["finding_statuses"])
 LEDGER_FIELDS = set(SCHEMA["ledger"]["required_fields"])
+ANNEX_SUFFIX = SCHEMA["experiment"]["annex_suffix"]
+INFORMED_BY_SECTION = SCHEMA["experiment"]["informed_by_section"]
+ESTIMAND_HEADING_RE = re.compile(SCHEMA["experiment"]["estimand"]["heading_pattern"])
+ESTIMAND_REGISTRATION_RE = re.compile(
+    r"^\*\*" + re.escape(SCHEMA["experiment"]["estimand"]["registration_field"]) + r"\*\*:\s*([A-Za-z][\w-]*)"
+)
+REGISTRATION_VALUES = set(SCHEMA["experiment"]["estimand"]["registration_values"])
+CLAIM_ESTIMAND_RE = re.compile(SCHEMA["claim"]["estimand_reference_pattern"])
+WIKILINK_RE = re.compile(r"\[\[([^\]|#]+)(?:#[^\]|]*)?(?:\|[^\]]*)?\]\]")
+QUESTION_ID_RE = re.compile(r"^RQ\d+$", re.IGNORECASE)
 STATUS_RE = re.compile(r"^\*\*Status\*\*:\s*([a-z-]+)", re.MULTILINE)
 DATE_RE = re.compile(r"^\*\*Date\*\*:\s*(\d{4}-\d{2}-\d{2})", re.MULTILINE)
 HEADING_ID_RE = re.compile(r"^#\s+([A-Z][A-Z0-9]*-[A-Z0-9]+)\s*:", re.MULTILINE)
@@ -77,8 +89,74 @@ def read_text(path: Path, issues: list[Issue]) -> str | None:
     return None
 
 
-def has_heading(text: str, heading: str) -> bool:
-    return re.search(rf"^#+\s+{re.escape(heading)}\s*$", text, re.MULTILINE) is not None
+def has_heading(text: str, heading: str, ignore_case: bool = False) -> bool:
+    flags = re.MULTILINE | (re.IGNORECASE if ignore_case else 0)
+    return re.search(rf"^#+\s+{re.escape(heading)}\s*$", text, flags) is not None
+
+
+def section_body(text: str, heading: str) -> str | None:
+    """Return the text under a heading, up to the next heading of equal or higher level."""
+    match = re.search(rf"^(#+)\s+{re.escape(heading)}\s*$", text, re.MULTILINE)
+    if match is None:
+        return None
+    level = len(match.group(1))
+    rest = text[match.end():]
+    end = re.search(rf"^#{{1,{level}}}\s+", rest, re.MULTILINE)
+    return rest[: end.start()] if end else rest
+
+
+def estimand_registrations(text: str) -> dict[str, str]:
+    """Map each declared estimand ID to its registration value ("" when absent)."""
+    declared: dict[str, str] = {}
+    current: str | None = None
+    for line in text.splitlines():
+        heading = ESTIMAND_HEADING_RE.match(line)
+        if heading:
+            current = heading.group(0).split()[-1].upper()
+            declared.setdefault(current, "")
+            continue
+        if line.startswith("#"):
+            current = None
+            continue
+        if current is not None and not declared[current]:
+            registration = ESTIMAND_REGISTRATION_RE.match(line)
+            if registration:
+                declared[current] = registration.group(1).lower()
+    return declared
+
+
+def notebook_markdown_files(root: Path) -> list[Path]:
+    return [
+        path
+        for path in root.rglob("*.md")
+        if not any(part.startswith(".") for part in path.relative_to(root).parts)
+    ]
+
+
+def wikilink_resolves(root: Path, target: str) -> bool:
+    stem = target.strip()
+    if QUESTION_ID_RE.fullmatch(stem):
+        return True
+    return any(path.stem == stem for path in notebook_markdown_files(root))
+
+
+def validate_section_links(
+    root: Path, path: Path, text: str, heading: str, issues: list[Issue]
+) -> None:
+    body = section_body(text, heading)
+    if body is None:
+        return
+    for target in WIKILINK_RE.findall(body):
+        if not wikilink_resolves(root, target):
+            issues.append(
+                Issue("ERROR", path, f"{heading} link [[{target}]] does not resolve to a notebook file")
+            )
+    for reference in MARKDOWN_LINK_RE.findall(body):
+        if reference.startswith(("http://", "https://", "mailto:", "#")):
+            continue
+        target = plan_link_path(root, path, reference)
+        if target.suffix.lower() == ".md" and not target.is_file():
+            issues.append(Issue("ERROR", path, f"{heading} link {reference} does not resolve"))
 
 
 def frontmatter(text: str) -> dict[str, str]:
@@ -138,6 +216,13 @@ def validate_experiments(root: Path, issues: list[Issue]) -> None:
     for path in sorted(experiment_dir.glob("*.md")):
         if path.name == "README.md":
             continue
+        if path.name.endswith(ANNEX_SUFFIX):
+            annex_match = FILE_ID_RE.match(path.name)
+            if not annex_match or experiment_record(root, annex_match.group(1)) is None:
+                issues.append(
+                    Issue("ERROR", path, "annex filename must start with the ID of an existing experiment")
+                )
+            continue
         text = read_text(path, issues)
         if text is None:
             continue
@@ -173,10 +258,37 @@ def validate_experiments(root: Path, issues: list[Issue]) -> None:
             issues.append(Issue("ERROR", path, "missing **Status** field"))
             continue
         status = status_match.group(1)
-        if status not in STATUSES:
+        if status in STATUS_ALIASES:
+            canonical = STATUS_ALIASES[status]
+            issues.append(
+                Issue("WARNING", path, f"legacy status spelling {status!r}; write {canonical!r}")
+            )
+            status = canonical
+        elif status in REJECTED_STATUSES:
+            issues.append(
+                Issue("ERROR", path, f"status {status!r} is not accepted: {REJECTED_STATUSES[status]}")
+            )
+            continue
+        elif status not in STATUSES:
             issues.append(Issue("ERROR", path, f"unknown experiment status {status!r}"))
 
-        designed = {"planned", "queued", "running", "in-progress", "pilot-complete", "completed"}
+        for estimand_id, value in estimand_registrations(text).items():
+            if not value:
+                issues.append(
+                    Issue("ERROR", path, f"estimand {estimand_id} has no **Registration**: line")
+                )
+            elif value not in REGISTRATION_VALUES:
+                issues.append(
+                    Issue(
+                        "ERROR",
+                        path,
+                        f"estimand {estimand_id} registration {value!r} is not one of "
+                        f"{', '.join(sorted(REGISTRATION_VALUES))}",
+                    )
+                )
+        validate_section_links(root, path, text, INFORMED_BY_SECTION, issues)
+
+        designed = {"planned", "queued", "running", "in-progress", "pilot-complete", "blocked", "completed"}
         if status in designed:
             for heading in (
                 "Hypothesis",
@@ -270,17 +382,59 @@ def evidence_path(root: Path, reference: str) -> Path:
     return root / relative
 
 
-def experiment_exists(root: Path, experiment_id: str) -> bool:
+def experiment_record(root: Path, experiment_id: str) -> Path | None:
     normalized = experiment_id.casefold()
-    for path in (root / "experiments").glob("*.md"):
+    for path in sorted((root / "experiments").glob("*.md")):
+        if path.name.endswith(ANNEX_SUFFIX):
+            continue
         stem = path.stem.casefold()
         if stem == normalized:
-            return True
+            return path
         if stem.startswith(normalized):
             suffix = stem[len(normalized):]
             if suffix and not suffix[0].isalnum():
-                return True
-    return False
+                return path
+    return None
+
+
+def experiment_exists(root: Path, experiment_id: str) -> bool:
+    return experiment_record(root, experiment_id) is not None
+
+
+def validate_claim_estimands(
+    root: Path, path: Path, line_number: int, evidence: str, issues: list[Issue]
+) -> None:
+    for experiment_id, estimand_id in CLAIM_ESTIMAND_RE.findall(evidence):
+        reference = f"{experiment_id}:{estimand_id}"
+        record = experiment_record(root, experiment_id)
+        declared = estimand_registrations(record.read_text(encoding="utf-8")) if record else {}
+        value = declared.get(estimand_id.upper())
+        if value is None:
+            declared_ids = ", ".join(sorted(declared)) or "none"
+            issues.append(
+                Issue(
+                    "ERROR",
+                    path,
+                    f"line {line_number}: {reference} does not resolve; {experiment_id} declares {declared_ids}",
+                )
+            )
+        elif value == "found":
+            issues.append(
+                Issue(
+                    "WARNING",
+                    path,
+                    f"line {line_number}: {reference} is a found estimand, so this claim is a found result; "
+                    "confirmatory use needs a fresh registered run",
+                )
+            )
+        elif value == "gate":
+            issues.append(
+                Issue(
+                    "WARNING",
+                    path,
+                    f"line {line_number}: {reference} is a gate on another estimand, not a result to cite",
+                )
+            )
 
 
 def validate_claims(root: Path, issues: list[Issue]) -> None:
@@ -356,6 +510,7 @@ def validate_claims(root: Path, issues: list[Issue]) -> None:
                 issues.append(Issue("ERROR", path, f"line {line_number}: missing finding path {reference}"))
         if CLAIM_PAPER_PATH_RE.search(evidence):
             issues.append(Issue("ERROR", path, f"line {line_number}: papers cannot be evidence sources"))
+        validate_claim_estimands(root, path, line_number, evidence, issues)
         if not resolved_experiment:
             issues.append(
                 Issue(
@@ -457,13 +612,29 @@ def validate_plans(root: Path, issues: list[Issue]) -> None:
                 issues.append(
                     Issue("ERROR", path, "terminal plan next_action must be empty or none")
                 )
-            for heading in plan_schema["terminal_sections"]:
+            for heading in plan_schema["terminal_sections"].get(status, []):
                 if not has_heading(text, heading):
                     issues.append(
                         Issue("ERROR", path, f"terminal plan lacks ## {heading}")
                     )
+            report = plan_schema["completion_report"]
+            if status == "completed" and not any(
+                has_heading(text, heading, ignore_case=True)
+                for heading in report["recognized_headings"]
+            ):
+                issues.append(
+                    Issue("ERROR", path, f"completed plan lacks ## {report['heading']}")
+                )
         elif not next_action:
             issues.append(Issue("ERROR", path, "nonterminal plan needs next_action"))
+        reserve = plan_schema["confirmation_reserve"]
+        reserve_body = section_body(text, reserve["heading"])
+        if reserve_body is not None:
+            for marker in reserve["required_markers"]:
+                if f"**{marker}:**" not in reserve_body and f"**{marker}**:" not in reserve_body:
+                    issues.append(
+                        Issue("ERROR", path, f"{reserve['heading']} section lacks **{marker}:**")
+                    )
         for field in plan_schema["required_frontmatter_by_status"].get(status, []):
             if not metadata.get(field, "").strip():
                 issues.append(Issue("ERROR", path, f"{status} plan requires {field}"))
@@ -703,6 +874,15 @@ Example.
         _, invalid_issues = validate(root)
         if not any("unknown experiment status" in issue.message for issue in invalid_issues):
             print("ERROR: self-test did not detect an invalid status")
+            return 1
+        experiment.write_text(
+            experiment.read_text(encoding="utf-8").replace("finished", "completed")
+            + "\n## Estimands\n\n### E1 Example quantity\n\nNo registration line.\n",
+            encoding="utf-8",
+        )
+        _, estimand_issues = validate(root)
+        if not any("no **Registration**" in issue.message for issue in estimand_issues):
+            print("ERROR: self-test did not detect an unregistered estimand")
             return 1
     print("validate-notebook self-test passed")
     return 0

@@ -185,6 +185,92 @@ class NotebookValidationTests(unittest.TestCase):
         )
         self.assertIn("not listed in README.md", self.messages())
 
+    def test_blocked_status_is_canonical(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT.replace("**Status**: completed", "**Status**: blocked"),
+            encoding="utf-8",
+        )
+        self.assertEqual(self.messages(), [])
+
+    def test_status_qualifier_in_parentheses_is_allowed(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT.replace(
+                "**Status**: completed", "**Status**: completed (2026-08-11)"
+            ),
+            encoding="utf-8",
+        )
+        self.assertEqual(self.messages(), [])
+
+    def test_legacy_status_spelling_warns(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT.replace("**Status**: completed", "**Status**: done"),
+            encoding="utf-8",
+        )
+        root, issues = validator.validate(self.root)
+        self.assertEqual(
+            [(issue.level, issue.message) for issue in issues],
+            [("WARNING", "legacy status spelling 'done'; write 'completed'")],
+        )
+
+    def test_closed_status_is_rejected(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT.replace("**Status**: completed", "**Status**: closed"),
+            encoding="utf-8",
+        )
+        self.assertTrue(
+            any("status 'closed' is not accepted" in message for message in self.messages())
+        )
+
+    def test_estimand_requires_recognized_registration(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT
+            + "\n## Estimands\n\n### E1 Metric change\n\nProse only.\n\n### E2 Headroom\n\n**Registration**: planned\n",
+            encoding="utf-8",
+        )
+        messages = self.messages()
+        self.assertIn("estimand E1 has no **Registration**: line", messages)
+        self.assertTrue(
+            any("estimand E2 registration 'planned'" in message for message in messages)
+        )
+
+    def test_registered_estimands_are_valid(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT
+            + "\n## Estimands\n\n### E1 Metric change\n\n**Registration**: registered\n\n### E2 Headroom\n\n**Registration**: gate\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(self.messages(), [])
+
+    def test_informed_by_links_must_resolve(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT
+            + "\n## Informed by\n\n- [[EXP-000-missing]]\n- [[RQ1]]\n- [[EXP-001-synthetic-check]]\n",
+            encoding="utf-8",
+        )
+        self.assertEqual(
+            self.messages(),
+            ["Informed by link [[EXP-000-missing]] does not resolve to a notebook file"],
+        )
+
+    def test_annex_is_not_an_experiment(self) -> None:
+        self.fixture.add_experiment()
+        annex = self.root / "experiments" / "EXP-001-synthetic-check.annex.md"
+        annex.write_text("# Residuals\n\n| row | value |\n|---|---|\n", encoding="utf-8")
+        self.assertEqual(self.messages(), [])
+        orphan = self.root / "experiments" / "EXP-009-orphan.annex.md"
+        orphan.write_text("# Rows\n", encoding="utf-8")
+        self.assertIn(
+            "annex filename must start with the ID of an existing experiment",
+            self.messages(),
+        )
+
     def test_finding_contract_and_index(self) -> None:
         path = self.root / "findings" / "2026-08-11-synthetic-result.md"
         path.write_text(FINDING, encoding="utf-8")
@@ -255,6 +341,42 @@ class NotebookValidationTests(unittest.TestCase):
             encoding="utf-8",
         )
         self.assertEqual(self.messages(), [])
+
+    def test_claim_estimand_reference_must_resolve(self) -> None:
+        self.fixture.add_experiment()
+        (self.root / "CLAIMS.md").write_text(
+            """# Claims
+
+| ID | Role | Claim | Status | Evidence | Paper |
+|---|---|---|---|---|---|
+| C1 | major | Synthetic result | supported | EXP-001:E1 | synthetic-paper |
+""",
+            encoding="utf-8",
+        )
+        self.assertTrue(
+            any("EXP-001:E1 does not resolve" in message for message in self.messages())
+        )
+
+    def test_claim_citing_found_estimand_warns(self) -> None:
+        path = self.fixture.add_experiment()
+        path.write_text(
+            COMPLETED_EXPERIMENT
+            + "\n## Estimands\n\n### E1 Metric change\n\n**Registration**: registered\n\n### E2 Side pattern\n\n**Registration**: found\n",
+            encoding="utf-8",
+        )
+        (self.root / "CLAIMS.md").write_text(
+            """# Claims
+
+| ID | Role | Claim | Status | Evidence | Paper |
+|---|---|---|---|---|---|
+| C1 | major | Synthetic result | supported | EXP-001:E1 | synthetic-paper |
+| C2 | supporting | Side pattern | provisional | EXP-001:E2 | synthetic-paper |
+""",
+            encoding="utf-8",
+        )
+        root, issues = validator.validate(self.root)
+        self.assertEqual([issue.level for issue in issues], ["WARNING"])
+        self.assertIn("EXP-001:E2 is a found estimand", issues[0].message)
 
     def test_claim_requires_valid_role_and_paper_key(self) -> None:
         self.fixture.add_experiment()
@@ -342,18 +464,60 @@ class NotebookValidationTests(unittest.TestCase):
         )
         messages = self.messages()
         self.assertIn("terminal plan next_action must be empty or none", messages)
-        self.assertIn("terminal plan lacks ## Disposition", messages)
+        self.assertIn("completed plan lacks ## Completion report", messages)
         self.assertIn("terminal plan lacks ## Evidence", messages)
 
-    def test_terminal_plan_with_disposition_is_valid(self) -> None:
+    def test_abandoned_plan_requires_disposition(self) -> None:
+        plans = self.root / "plans" / "abandoned"
+        plans.mkdir(parents=True)
+        abandoned = PLAN.replace("status: active", "status: abandoned").replace(
+            "next_action: Run Phase 1", "next_action: none"
+        ).replace("current_phase: Phase 1", "abandoned_because: The premise changed")
+        (plans / "2026-08-11-synthetic-control.md").write_text(
+            abandoned, encoding="utf-8"
+        )
+        messages = self.messages()
+        self.assertIn("terminal plan lacks ## Disposition", messages)
+        self.assertIn("terminal plan lacks ## Evidence", messages)
+        self.assertNotIn("completed plan lacks ## Completion report", messages)
+
+    def test_completed_plan_with_completion_report_is_valid(self) -> None:
         plans = self.root / "plans" / "completed"
         plans.mkdir(parents=True)
         terminal = PLAN.replace("status: active", "status: completed").replace(
             "next_action: Run Phase 1", "next_action: none"
         )
-        terminal += "\n## Disposition\n\nThe control passed.\n\n## Evidence\n\n- [[EXP-001]]\n"
+        terminal += "\n## Completion report\n\nThe control passed.\n\n## Evidence\n\n- [[EXP-001]]\n"
         (plans / "2026-08-11-synthetic-control.md").write_text(
             terminal, encoding="utf-8"
+        )
+        self.assertEqual(self.messages(), [])
+
+    def test_completed_plan_accepts_recognized_outcome_heading(self) -> None:
+        plans = self.root / "plans" / "completed"
+        plans.mkdir(parents=True)
+        terminal = PLAN.replace("status: active", "status: completed").replace(
+            "next_action: Run Phase 1", "next_action: none"
+        )
+        terminal += "\n## Execution result\n\nThe control passed.\n\n## Evidence\n\n- [[EXP-001]]\n"
+        (plans / "2026-08-11-synthetic-control.md").write_text(
+            terminal, encoding="utf-8"
+        )
+        self.assertEqual(self.messages(), [])
+
+    def test_confirmation_reserve_requires_both_markers(self) -> None:
+        plans = self.root / "plans"
+        plans.mkdir()
+        reserved = PLAN + "\n## Confirmation reserve\n\n**Held back:** seeds 7 and 11\n"
+        (plans / "2026-08-11-synthetic-control.md").write_text(
+            reserved, encoding="utf-8"
+        )
+        self.assertIn(
+            "Confirmation reserve section lacks **Decision rule:**", self.messages()
+        )
+        (plans / "2026-08-11-synthetic-control.md").write_text(
+            reserved + "\n**Decision rule:** accept if the reserve beats baseline by 2pp\n",
+            encoding="utf-8",
         )
         self.assertEqual(self.messages(), [])
 

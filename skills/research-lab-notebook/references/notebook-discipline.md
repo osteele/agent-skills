@@ -38,6 +38,32 @@ one-line answer for a resolved question, followed by a link to the evidence.
 - Use version control for edit history. Use `CHANGELOG.md` for research history.
 - Keep completed work out of active roadmaps and queues.
 
+## Two facts only the design moment can supply
+
+Name each estimand and say what was fixed about it in advance. A registration
+that does not name the quantity it covers cannot tell a licensed citation from
+an opportunistic one. Write each as `E1`, `E2`, and so on, with the statistic,
+the expected direction, and the label every outcome reaches, including the
+outcome that refutes the hypothesis. An estimand with nothing fixed in advance
+is written as such and marked `found`. That is a normal thing for a run to
+produce; mislabeling it as registered is the failure the rule prevents.
+
+Record what the design was informed by, in an `## Informed by` section, at
+design time and again at each amendment. Say explicitly where a previous run's
+unregistered facet is among the inputs. Everything else about an experiment is
+recoverable by audit: provenance from the artifact, replication breadth by
+counting cells, the job from the runner. These two are not, and they decay
+silently. The grammar for both is in [Experiments](experiments.md).
+
+## Corrections propagate by search
+
+When an experiment retracts a value, it writes the new value beside the old
+one, and the same session searches the notebook for the superseded numbers and
+the experiment ID. Findings that cite the experiment get a correction pointer
+or a superseding record; terminal plans that stated the value get a retraction
+notice beneath the passage. Notebook edges point forward, so nothing asks who
+relied on the old value unless the sweep does.
+
 ## Prefer durable evidence
 
 A job log may expire. A chat transcript may be unavailable to the next agent.

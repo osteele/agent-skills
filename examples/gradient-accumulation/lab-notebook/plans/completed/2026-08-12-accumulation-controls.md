@@ -50,10 +50,19 @@ mean and every paired difference are below 0.02. Record [[EXP-002]].
 - Phase 1 evidence was reviewed at the pilot gate before Phase 2 was approved.
 - Phase 2 evidence and the terminal disposition were reviewed before closure.
 
-## Disposition
+## Completion report
 
-Completed. Both phases passed their preregistered gates. The conclusion remains
-limited to the deterministic simulator.
+Completed on 2026-08-16. Both phases passed their preregistered gates.
+
+| Goal | Outcome | Record |
+|---|---|---|
+| Phase 1 pilot is finite and inside the margin | met | [[EXP-001-accumulation-pilot]] |
+| Phase 2 mean and per-seed differences stay inside the margin | met | [[EXP-002-accumulation-comparison]] |
+
+Limitations: the simulator is deterministic and has no optimizer state, so the
+result says nothing about floating-point order or a real model. No follow-up is
+open; a real-training replication would be a new plan. Both jobs are processed
+and their ledger records are listed under Evidence.
 
 ## Evidence
 

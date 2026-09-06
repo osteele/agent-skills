@@ -1,5 +1,5 @@
 {
-  "schema_version": 4,
+  "schema_version": 5,
   "required_files": [
     "STATUS.md",
     "QUESTIONS.md",
@@ -15,12 +15,32 @@
     "running",
     "in-progress",
     "pilot-complete",
+    "blocked",
     "completed",
     "abandoned"
   ],
+  "experiment_status_aliases": {
+    "complete": "completed",
+    "done": "completed",
+    "cancelled": "abandoned",
+    "canceled": "abandoned"
+  },
+  "rejected_experiment_statuses": {
+    "closed": "means abandoned in some records and completed in others; write the one that applies"
+  },
   "experiment_id": {
     "pattern": "^[A-Z][A-Z0-9]*-[A-Z0-9]+$",
     "examples": ["EXP-001", "ACC-E1"]
+  },
+  "experiment": {
+    "annex_suffix": ".annex.md",
+    "informed_by_section": "Informed by",
+    "estimand": {
+      "heading_pattern": "^#{2,4}\\s+E\\d+\\b",
+      "registration_field": "Registration",
+      "registration_values": ["registered", "found", "gate"],
+      "claim_reference": "EXP-NNN:E#"
+    }
   },
   "finding_statuses": [
     "supported",
@@ -34,7 +54,8 @@
     "statuses": ["supported", "provisional", "blocked", "refuted", "retired"],
     "evidence_requires_experiment": true,
     "paper_required": true,
-    "promotion_requires_human_review": true
+    "promotion_requires_human_review": true,
+    "estimand_reference_pattern": "\\b([A-Z][A-Z0-9]*-[A-Z0-9]+):(E\\d+)\\b"
   },
   "plan": {
     "statuses": ["draft", "active", "blocked", "gated", "backlog", "superseded", "completed", "abandoned"],
@@ -76,7 +97,30 @@
       "Risks and controls",
       "Terminal conditions"
     ],
-    "terminal_sections": ["Disposition", "Evidence"]
+    "terminal_sections": {
+      "completed": ["Evidence"],
+      "superseded": ["Disposition", "Evidence"],
+      "abandoned": ["Disposition", "Evidence"]
+    },
+    "completion_report": {
+      "heading": "Completion report",
+      "recognized_headings": [
+        "Completion report",
+        "Completion",
+        "Completion note",
+        "Completion audit",
+        "Outcome",
+        "Execution outcome",
+        "Execution result",
+        "Closed",
+        "Disposition"
+      ]
+    },
+    "confirmation_reserve": {
+      "heading": "Confirmation reserve",
+      "required_markers": ["Held back", "Decision rule"]
+    },
+    "retraction_notice_prefix": "**Retracted"
   },
   "human_review": {
     "checkpoints": [

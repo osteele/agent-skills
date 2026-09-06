@@ -18,10 +18,30 @@ accumulated and true batches is below 0.02.
 - **Revision**: `synthetic-code-v1`
 - **Key command**: `python3 scripts/simulate.py --condition <condition> --seed <seed>`
 
+## Estimands
+
+### E1 Mean paired loss difference
+
+**Registration**: registered. The statistic is the mean paired
+final-validation-loss difference across seeds 1 through 3; the threshold is
+0.02; a mean at or above it fails P1.
+
+### E2 Per-seed loss difference
+
+**Registration**: registered. Every paired difference must be below 0.02; one
+seed at or above it fails P2.
+
+## Informed by
+
+- [[EXP-001-accumulation-pilot]], whose registered E1 passed at seed 1. Seed 1
+  is reused here, so E1 in this record is a replication at that seed and a
+  fresh test at seeds 2 and 3.
+- [[2026-08-12-accumulation-controls]]
+
 ## Preregistered predictions (a priori)
 
-- **P1: Mean equivalence**: the mean paired difference is below 0.02.
-- **P2: Seed consistency**: every paired difference is below 0.02.
+- **P1: Mean equivalence (E1)**: the mean paired difference is below 0.02.
+- **P2: Seed consistency (E2)**: every paired difference is below 0.02.
 
 ## Decision rule (a priori)
 

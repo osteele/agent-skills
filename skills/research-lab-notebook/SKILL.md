@@ -1,6 +1,6 @@
 ---
 name: research-lab-notebook
-description: Set up and operate a durable, file-based research lab notebook with questions, priorities, experiments, preregistered predictions, job results, findings, plans, claims, and publication tracking. Use when creating or adapting a lab-notebook/ directory, editing its records, registering or processing experiments, connecting a local process or job system such as Dagu, Pueue, SkyPilot, Slurm, or Weft, or handing research work across agents and sessions.
+description: Set up and operate a durable, file-based research lab notebook with questions, priorities, experiments, registered estimands, preregistered predictions, job results, findings, plans, claims, and publication tracking. Use when creating or adapting a lab-notebook/ directory, editing its records, registering or processing experiments, connecting a local process or job system such as Dagu, Pueue, SkyPilot, Slurm, or Weft, or handing research work across agents and sessions.
 ---
 
 # Research lab notebook
@@ -17,8 +17,9 @@ Read the matching reference before writing:
 |---|---|
 | Create or adopt a notebook | [Setup](references/setup.md), [Notebook structure](references/notebook-structure.md), and [Project instructions](references/project-instructions.md) |
 | Decide where information belongs | [Notebook discipline](references/notebook-discipline.md) |
+| Trace provenance across files, or decide where a new cross-reference belongs | [Notebook graph](references/notebook-graph.md) |
 | Edit STATUS, QUESTIONS, GLOSSARY, BIBLIOGRAPHY, PRIORITIES, CHANGELOG, or indexes | [Notebook files](references/notebook-files.md) |
-| Register an experiment or process a run | [Experiments](references/experiments.md) and [Job runners](references/job-runners.md) |
+| Register an experiment, name its estimands, or process a run (local or remote) | [Experiments](references/experiments.md) and [Job runners](references/job-runners.md) |
 | Analyze results or state a conclusion | [Research methodology](references/research-methodology.md) |
 | Write a cross-experiment synthesis | [Findings](references/findings.md) |
 | Create, resume, or close a plan | [Plans](references/plans.md) |
@@ -36,6 +37,9 @@ Read the matching reference before writing:
    provenance, location, and content hash when practical.
 5. Write predictions and decision thresholds before inspecting outcomes. Never
    rewrite them after results are known.
+6. Name each estimand with its registration value (`registered`, `found`, or
+   `gate`) and record what informed the design. These two facts exist only at
+   the design moment and cannot be recovered later.
 
 ## Pause for human review
 
@@ -82,7 +86,13 @@ experiment, or claim update.
 
 4. Make the update durable in the notebook's version-control boundary.
 5. Mark a job processed only after its outputs are checked, the notebook update
-   passes validation, and the durable write succeeds.
+   passes validation, and the durable write succeeds. A run on the local
+   machine has no processed flag and its output may be the only copy; record
+   its numbers before anything can overwrite them.
+6. When a value is corrected, state the superseded value beside the new one and
+   search the notebook for both the old value and the experiment ID, so
+   findings and terminal plans that relied on it get their pointer or
+   retraction notice in the same session.
 
 Stop at the user's requested boundary. Do not submit a real job, spend money,
 publish, write externally, or start unattended execution without authorization.
