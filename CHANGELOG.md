@@ -13,6 +13,18 @@
 - The site contract check targets the standalone Research Notebook
   documentation site.
 
+### Plans
+
+- Authorized bounded plans support narrated, stepped, unattended, and handoff
+  execution modes. Continuous execution removes routine conversational pauses
+  while preserving scientific, human-review, scope, budget, and permission gates.
+- Plan preview explains proposed work without execution. Results walkthrough
+  (replay) reviews retained evidence in dependency order, design before results,
+  and pauses after each experiment. Neither activity launches work, regenerates
+  missing evidence, or changes execution state.
+- A dedicated plan-execution reference provides portable natural-language
+  invocation examples for local execution and read-only review.
+
 ### Publications
 
 - Notebook manuscripts are content-canonical Typst sources that use Arkheion

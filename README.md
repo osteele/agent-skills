@@ -215,6 +215,41 @@ and history across providers and sessions. Native planning modes remain useful
 for creating or executing a notebook plan. See the [plan
 specification](skills/research-lab-notebook/references/plans.md).
 
+### Choose execution or read-only review
+
+Use ordinary language to name the installed skill, plan path, and mode. For
+example:
+
+> Use the installed research-lab-notebook skill to execute the authorized work
+> in lab-notebook/plans/2026-09-01-controls.md locally in stepped mode. After
+> each EXP, explain its original design and setup before the findings, discuss
+> interpretation and the next action, and stop until I say proceed.
+
+> Use the installed research-lab-notebook skill for a results walkthrough of
+> lab-notebook/plans/completed/2026-09-01-controls.md. Replay existing experiments
+> in dependency order, design before results, and pause after each until I say
+> next. Do not run anything or change the notebook.
+
+Execution defaults to **narrated** mode: report each result and continue without
+routine conversational pauses. **Stepped** pauses after every experiment,
+**unattended** reports in the notebook, and **handoff** gives a terminal report.
+Continuous execution means carrying out an explicitly authorized bounded plan.
+Every mode preserves scientific, human-review, scope, budget, and permission
+gates. Stepped execution does not prequeue the next experiment or continue a
+parallel branch around its pause.
+
+A **plan preview** explains proposed work, dependencies, controls, decision
+rules, costs, and uncertainties without execution. A **results walkthrough**
+(also called **replay**) reviews retained experiments and results; it never
+launches, retries, repairs scripts, or recomputes measurements. Both work on
+incomplete and completed plans. Missing evidence is disclosed, not regenerated.
+Neither takes execution ownership nor changes notebook state unless the user
+separately authorizes banking review corrections.
+
+These are skill instructions, not standalone CLI flags or a bundled scheduler.
+The [execution and review workflow](skills/research-lab-notebook/references/plan-execution.md)
+defines the full contract and gives additional portable invocation examples.
+
 ## Running experiments
 
 Research projects launch work on laptops, shared clusters, cloud services, and
@@ -254,7 +289,8 @@ portable.
 Each lab can add the automation and infrastructure that fits its environment.
 This collection leaves the following choices to the project:
 
-- autonomous research loops and unattended plan execution;
+- infrastructure for long-running execution and any separately authorized
+  open-ended research loops beyond the skill's bounded-plan workflow;
 - code-audit hooks and research-script lint rules;
 - credentials, hostnames, personal paths, project rosters, and private venue
   notes; and
@@ -262,6 +298,12 @@ This collection leaves the following choices to the project:
 
 Those choices belong to each lab's environment and risk model. The notebook is
 useful even when every job is launched by hand.
+
+The portable skill supports explicitly authorized bounded plan execution,
+including unattended reporting, without private tooling. Installing it or
+requesting a preview or walkthrough does not authorize running experiments.
+It does not start unsolicited or open-ended autonomous loops or add code-audit
+behavior.
 
 ## License
 

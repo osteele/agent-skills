@@ -6,6 +6,15 @@ retrieve its outputs, cancel it when authorized, and record that its evidence
 has been processed. Record each procedure in the project's `RUNNER.md`. This
 project-specific mapping is the runner contract.
 
+For authorized bounded plan execution, follow the
+[execution mode](plan-execution.md#execution-modes). Local and remote runs have
+the same evidence-processing and human-review obligations in
+[Experiments](experiments.md#processing-a-result); only artifact durability
+differs. Reporting cadence does not change when a job may be marked processed.
+Plan preview and results walkthrough (replay) read retained evidence without
+submitting work, retrying jobs, recomputing measurements, or changing processed
+state.
+
 ## Required capabilities
 
 | Capability | Required result |

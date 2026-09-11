@@ -1,6 +1,6 @@
 ---
 name: research-lab-notebook
-description: Set up and operate a durable, file-based research lab notebook with questions, priorities, experiments, registered estimands, preregistered predictions, job results, findings, plans, claims, and publication tracking. Use when creating or adapting a lab-notebook/ directory, editing its records, registering or processing experiments, connecting a local process or job system such as Dagu, Pueue, SkyPilot, Slurm, or Weft, or handing research work across agents and sessions.
+description: Set up and operate a durable, file-based research lab notebook with questions, priorities, experiments, registered estimands, preregistered predictions, job results, findings, plans, claims, and publication tracking. Use when creating or adapting a lab-notebook/ directory, editing its records, registering or processing experiments, previewing or executing an authorized bounded plan, walking through or replaying existing results without execution, connecting a local process or job system such as Dagu, Pueue, SkyPilot, Slurm, or Weft, or handing research work across agents and sessions.
 ---
 
 # Research lab notebook
@@ -11,7 +11,7 @@ records, not format specifications.
 
 ## Route the task
 
-Read the matching reference before writing:
+Read the matching reference before acting:
 
 | Task | Read |
 |---|---|
@@ -23,8 +23,13 @@ Read the matching reference before writing:
 | Analyze results or state a conclusion | [Research methodology](references/research-methodology.md) |
 | Write a cross-experiment synthesis | [Findings](references/findings.md) |
 | Create, resume, or close a plan | [Plans](references/plans.md) |
+| Preview or execute a plan; walk through or replay existing results | [Plan execution and read-only review](references/plan-execution.md) |
 | Curate claims or publication readiness | [Publication](references/publication.md) |
 | Adapt a compute backend | [Runner adapters](references/runner-adapters.md) and, when needed, [Processed-job ledger](references/processed-job-ledger.md) |
+
+Route preview and results walkthrough requests before execution or notebook
+updates. The writing steps below apply only when a write is authorized; a
+read-only request does not acquire execution ownership or enter those steps.
 
 ## Before writing
 
@@ -56,6 +61,20 @@ Treat these as decision gates, not courtesy notifications:
 An agent may prepare the materials for review. It must not record its own output
 as human approval. Record the decision and resulting scope in the owning plan,
 experiment, or claim update.
+
+Execution modes govern routine reporting, not these gates. Use narrated mode
+by default; stepped mode pauses after every EXP; unattended mode reports in the
+notebook; handoff mode gives a terminal report. Continuous execution carries
+out only the explicitly authorized bounded plan. It never waives human review,
+scope, budget, or permissions.
+
+Plan preview and results walkthrough (also called replay) are read-only
+activities. Preview explains the proposed work. Walkthrough explains existing
+experiments in dependency order, design before results, and stops after each
+until the user says next. Neither launches work nor changes execution ownership
+or notebook state. Missing evidence is disclosed, never regenerated. Use the
+natural-language invocations in [Plan execution](references/plan-execution.md);
+these activities are not standalone CLI commands.
 
 ## Place evidence once
 

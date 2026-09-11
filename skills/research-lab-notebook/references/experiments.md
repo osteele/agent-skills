@@ -273,10 +273,14 @@ only the durability step differs.
    or dependent on state that has since changed. A local run has no processed
    flag; the experiment record's status is its equivalent.
 
-6. **Report** according to the session's agreed interaction mode: as each
-   result lands, after every experiment with a pause, in a review pass after
-   the batch, or as a terminal report only. Name the mode at the start of the
-   session rather than assuming one.
+6. **Report** according to the [execution mode](plan-execution.md#execution-modes):
+   narrated (default) reports each result without a routine pause; stepped
+   presents design and setup before findings after each EXP, discusses the
+   next action, and stops until the user says proceed; unattended reports in
+   the notebook; handoff gives a terminal report. Name the mode at the start.
+   Every mode retains the human-review gates above. Results walkthrough
+   (replay) is a separate read-only review of retained evidence, not a reporting
+   mode that launches or processes jobs.
 
 Processing must be idempotent. If the job is already processed, verify the
 linked notebook evidence rather than adding a second entry. Failed jobs can be

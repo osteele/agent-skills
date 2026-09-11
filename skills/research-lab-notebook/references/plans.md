@@ -5,6 +5,12 @@ records scope, dependencies, decisions, handoffs, review gates, and exit
 conditions across experiments, agents, harnesses, and sessions. Use `plans/`
 when several experiments or phases serve that objective.
 
+Use [Plan execution and read-only review](plan-execution.md) to preview a plan,
+execute it in narrated, stepped, unattended, or handoff mode, or conduct a
+results walkthrough (replay) of existing experiments. Preview and walkthrough
+work on incomplete or completed plans without launching jobs, taking execution
+ownership, or changing the records.
+
 ## Plans persist across sessions
 
 A notebook plan preserves the research contract in version control. One agent
@@ -243,14 +249,21 @@ recorded, nothing asks who relied on the old value unless the sweep does.
 A plan records intent and approved scope. An agent or harness may carry out only
 the phase or actions the user authorized. Expensive, destructive, privileged,
 publication, and external actions require their own authority. Keep
-`next_action` bounded; never turn it into an infinite monitor or autonomous
-loop.
+`next_action` bounded. Continuous or autonomous execution means following the
+explicitly authorized bounded plan without routine conversational pauses; it
+does not permit unsolicited or open-ended research loops.
 
 Pause for human review before changing a draft plan to active. After each phase,
 write its evidence and proposed disposition, then pause again. The reviewer
 chooses whether to continue, revise, move the plan to `gated` or `backlog`, or
 close it. A gated follow-up requires another explicit review before execution.
 Record the gate and the condition that permits reconsideration.
+
+The [execution mode](plan-execution.md#execution-modes) never removes these
+human-review gates. Stepped mode adds a stop after every experiment: explain
+the original design and setup before findings, discuss interpretation and the
+next action, then wait for the user to say proceed. Do not prequeue another
+experiment or bypass the stop through parallel branches.
 
 When handing a phase to another agent or harness, pass the plan path and phase
 name rather than copying its instructions into a prompt. The executor records
