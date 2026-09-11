@@ -24,9 +24,13 @@ lab-notebook/
   QUESTIONS.md
   PRIORITIES.md
   CHANGELOG.md
+  CLAIMS.md
   experiments/README.md
   findings/README.md
 ```
+
+Keep the claim table empty until the project has publication-sized claims
+with direct experimental evidence.
 
 Add optional files only when their question is current. See
 [Notebook structure](notebook-structure.md).

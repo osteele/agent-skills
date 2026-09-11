@@ -18,15 +18,15 @@ SOURCE = (
 )
 SITE_SCHEMA = Path("src/data/research-lab-notebook-schema.json")
 SITE_PAGES = (
-    Path("src/pages/reference/research-lab-notebook/reference/index.astro"),
-    Path("src/pages/reference/research-lab-notebook/experiments/index.astro"),
-    Path("src/pages/reference/research-lab-notebook/plans/index.astro"),
+    Path("src/pages/reference/index.astro"),
+    Path("src/pages/reference/experiments/index.astro"),
+    Path("src/pages/reference/plans/index.astro"),
 )
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("site", type=Path, help="Root of the notes site repository")
+    parser.add_argument("site", type=Path, help="Root of the Research Notebook site repository")
     args = parser.parse_args()
 
     site_schema_path = args.site.resolve() / SITE_SCHEMA

@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- The project is published as Research Notebook System at
+  `osteele/research-notebook`. Install commands use the new repository name;
+  the two skill names are unchanged.
+- Notebook schema 6 requires `CLAIMS.md` in the core set. Existing notebooks
+  can add the bundled empty claim ledger; an empty, correctly shaped table is
+  valid until the project has publication claims.
+- The site contract check targets the standalone Research Notebook
+  documentation site.
+
 ## v0.2.0
 
 Notebook schema 5. A notebook that validated under schema 4 may report new

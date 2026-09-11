@@ -24,7 +24,7 @@ project/
     references/             # optional cited-paper cache and tracked source notes
     kb/                     # optional stable reference material
     causal-models/          # optional working mechanism hypotheses
-    CLAIMS.md               # optional claim roles, paper keys, and evidence
+    CLAIMS.md               # core claim ledger; initially empty
     PUBLICATION.md          # optional paper readiness and venues
   scripts/                  # executable research code
   data/                     # raw or structured results
@@ -49,7 +49,6 @@ reproduce the run.
   hypothesis that must remain distinct from observed findings.
 - Add `GLOSSARY.md` when project-specific terms, acronyms, or equations need a
   stable definition.
-- Add `CLAIMS.md` when a paper argument needs claim roles and evidence mapping.
 - Add `PUBLICATION.md` when at least one paper is in active preparation.
 
 Empty scaffolding creates false affordances. A small notebook that grows with

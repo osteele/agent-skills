@@ -142,6 +142,12 @@ class NotebookFixture:
             path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("# Index\n", encoding="utf-8")
+        (root / "CLAIMS.md").write_text(
+            "# Publication claims\n\n"
+            "| ID | Role | Claim | Status | Evidence | Paper |\n"
+            "|---|---|---|---|---|---|\n",
+            encoding="utf-8",
+        )
 
     def add_experiment(self, name: str = "EXP-001-synthetic-check.md") -> pathlib.Path:
         path = self.root / "experiments" / name
@@ -164,6 +170,13 @@ class NotebookValidationTests(unittest.TestCase):
 
     def test_minimum_notebook_is_valid(self) -> None:
         self.assertEqual(self.messages(), [])
+
+    def test_missing_claim_ledger_is_invalid(self) -> None:
+        (self.root / "CLAIMS.md").unlink()
+        _, issues = validator.validate(self.root)
+        self.assertTrue(
+            any(issue.level == "ERROR" and issue.path.name == "CLAIMS.md" for issue in issues)
+        )
 
     def test_completed_experiment_requires_outcome_table(self) -> None:
         path = self.fixture.add_experiment()

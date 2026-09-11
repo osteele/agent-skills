@@ -465,7 +465,6 @@ def validate_claims(root: Path, issues: list[Issue]) -> None:
         )
         return
     seen: set[str] = set()
-    saw_row = False
     for line_number, line in enumerate(lines[header_index + 2 :], start=header_index + 3):
         if not line.lstrip().startswith("|"):
             break
@@ -473,7 +472,6 @@ def validate_claims(root: Path, issues: list[Issue]) -> None:
         if len(cells) != len(expected_columns):
             issues.append(Issue("ERROR", path, f"line {line_number}: claim row has {len(cells)} columns"))
             continue
-        saw_row = True
         claim_id, role, claim, status, evidence, paper = cells
         if not CLAIM_ID_RE.fullmatch(claim_id):
             issues.append(Issue("ERROR", path, f"line {line_number}: invalid claim ID {claim_id!r}"))
@@ -529,8 +527,6 @@ def validate_claims(root: Path, issues: list[Issue]) -> None:
                     f"line {line_number}: evidence must cite at least one experiment record; findings cannot replace it",
                 )
             )
-    if not saw_row:
-        issues.append(Issue("WARNING", path, "claim table has no rows"))
 
 
 def plan_paths(root: Path) -> list[Path]:
@@ -828,6 +824,12 @@ def self_test() -> int:
             path = root / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("# Placeholder\n", encoding="utf-8")
+        (root / "CLAIMS.md").write_text(
+            "# Publication claims\n\n"
+            "| ID | Role | Claim | Status | Evidence | Paper |\n"
+            "|---|---|---|---|---|---|\n",
+            encoding="utf-8",
+        )
         experiment = root / "experiments" / "EXP-001-example.md"
         experiment.write_text(
             """# EXP-001: Example

@@ -1,19 +1,23 @@
-# Agent skills for research notebooks
+# Research Notebook System
 
-A file-based research notebook gives a coding agent somewhere durable to read
-and write between sessions. Experiments, results, open questions, decisions,
-and publication claims stay in Markdown beside the project. The notebook
-complements metric trackers such as Weights & Biases and MLflow; it records the
-reasoning those systems do not.
+Research Notebook is a system for managing research with coding agents. It
+connects publication claims to the experiments that support them. A shared
+Markdown record preserves the context needed to continue the work across
+sessions.
 
-This repository packages the system as portable [Agent
-Skills](https://agentskills.io). The skills work with different coding agents,
-compute clusters, and job services.
+The system records predictions and decision criteria before compute, then
+places outcomes beside them. Claims cite their supporting experiments and
+state the limits of the evidence.
 
-Current documented contract: [`v0.2.0`](https://github.com/osteele/agent-skills/releases/tag/v0.2.0).
-The [guide and reference](https://notes.osteele.com/reference/research-lab-notebook/)
-show the notebook structure and workflows. Changes between releases are listed
-in [CHANGELOG.md](CHANGELOG.md).
+This repository contains the notebook contracts, schemas, validator, starter
+templates, and runnable examples. Portable [Agent Skills](https://agentskills.io)
+teach coding agents to operate the same records across compute backends.
+
+Start with the [guide](https://research-notebook.osteele.com/guide/) or consult
+the [reference](https://research-notebook.osteele.com/reference/).
+The current contract is defined by the
+[notebook schema](skills/research-lab-notebook/references/notebook-schema.json).
+Released versions and migration notes are in [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
 
@@ -23,25 +27,25 @@ collection for Claude Code, Codex, Cursor, OpenCode, and many other agents:
 Install the notebook skill into the current project:
 
 ```bash
-npx skills add osteele/agent-skills --skill research-lab-notebook -y
+npx skills add osteele/research-notebook --skill research-lab-notebook -y
 ```
 
 List the available skills without installing them:
 
 ```bash
-npx skills add osteele/agent-skills --list
+npx skills add osteele/research-notebook --list
 ```
 
 Install globally for specific agents:
 
 ```bash
-npx skills add osteele/agent-skills -g -a claude-code -a codex -y
+npx skills add osteele/research-notebook -g -a claude-code -a codex -y
 ```
 
 Add the optional reference archiver too:
 
 ```bash
-npx skills add osteele/agent-skills \
+npx skills add osteele/research-notebook \
   --skill research-lab-notebook \
   --skill download-research-references \
   -y
@@ -54,7 +58,7 @@ installs are available across projects.
 Try the notebook skill without installing it:
 
 ```bash
-npx skills use osteele/agent-skills@research-lab-notebook
+npx skills use osteele/research-notebook@research-lab-notebook
 ```
 
 Maintain an installation with:
@@ -113,8 +117,9 @@ research question
     -> claim and publication plan
 ```
 
-The baseline contains four top-level files and two directory indexes. Add other
-files only when their question becomes real:
+The baseline contains five top-level files and two directory indexes. The
+claim ledger starts empty; add claims when evidence supports a paper-sized
+argument. Add optional records when they have a current purpose.
 
 | File | Question it answers | Add it when |
 |---|---|---|
@@ -124,7 +129,7 @@ files only when their question becomes real:
 | `CHANGELOG.md` | What was learned or decided, and when? | Baseline |
 | `GLOSSARY.md` | What do project-specific terms, symbols, and acronyms mean? | Terminology needs a stable definition |
 | `BIBLIOGRAPHY.md` | Which papers matter, what do they say, and how are they relevant? | Related work is being tracked or cited |
-| `CLAIMS.md` | Which claims belong to each paper, what role do they play, and what supports them? | A publication argument needs evidence tracking |
+| `CLAIMS.md` | Which claims belong to each paper, what role do they play, and what supports them? | Baseline; initially empty |
 | `PUBLICATION.md` | What blocks each paper, and where might it go? | A paper enters active preparation |
 | `COMPANION-DOCS.md` | Which reports, guides, presentations, or IP documents accompany the research? | Several non-paper artifacts need an index |
 | `QA.md` | Which questions should a presentation be ready to answer? | Preparing a talk or defense |

@@ -1,10 +1,11 @@
 {
-  "schema_version": 5,
+  "schema_version": 6,
   "required_files": [
     "STATUS.md",
     "QUESTIONS.md",
     "PRIORITIES.md",
     "CHANGELOG.md",
+    "CLAIMS.md",
     "experiments/README.md",
     "findings/README.md"
   ],

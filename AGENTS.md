@@ -1,7 +1,7 @@
 # Repository guidance
 
-This repository publishes portable Agent Skills for file-based research
-notebooks.
+This repository publishes the Research Notebook System, including its file
+contracts, validator, examples, and portable Agent Skills.
 
 ## Development
 

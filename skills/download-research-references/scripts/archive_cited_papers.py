@@ -31,7 +31,7 @@ SOURCE_MAX_BYTES = 8 * 1024 * 1024
 SOURCE_MAX_UNPACKED_BYTES = 64 * 1024 * 1024
 SOURCE_MAX_MEMBERS = 1000
 SOURCE_EXT = {".tex", ".bib", ".bbl"}
-ARXIV_UA = "agent-skills-reference-archiver/1.0 (+https://arxiv.org/help/api)"
+ARXIV_UA = "research-notebook-reference-archiver/1.0 (+https://arxiv.org/help/api)"
 
 LATEX_CITATION_RE = re.compile(
     r"\\(?:cite|parencite|textcite|autocite|footcite|smartcite|supercite|nocite)"
@@ -349,7 +349,7 @@ def download_pdf(
     request = urllib.request.Request(
         url,
         headers={
-            "User-Agent": "Mozilla/5.0 (compatible; agent-skills-reference-archiver/1.0)",
+            "User-Agent": "Mozilla/5.0 (compatible; research-notebook-reference-archiver/1.0)",
             "Accept": "application/pdf,*/*;q=0.8",
         },
     )
