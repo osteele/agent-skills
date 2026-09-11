@@ -61,7 +61,8 @@ what blocks submission and where the paper might go.
 ## Paper: Working title
 
 **Paper key**: paper-key
-**Draft**: path or link
+**Manuscript**: `lab-notebook/papers/paper-key.typ`; content-canonical, natural-length
+**Packets**: path or link; venue; state; synced-as-of YYYY-MM-DD (omit until a packet exists)
 **Target venue**: name, verified deadline, and source
 
 ### Headline result
@@ -102,6 +103,69 @@ with urgency rather than scheduled, three fields carry it:
 Keep paper prose in the paper draft, next actions in `PRIORITIES.md`, and result
 details in experiments or findings.
 
+## Manuscripts and submission packets
+
+Each paper has up to two artifact roles:
+
+- The **manuscript** is the content-canonical, natural-length lineage master.
+  Its default home is `lab-notebook/papers/<name>.typ`, beside the evidence it
+  uses. It remains editable through arXiv revisions, venue review, and
+  post-publication updates.
+- A **submission packet** is a venue-constrained derivative created only when
+  preparing a specific submission. It applies the venue template, page limit,
+  and anonymization rules. Keep it in the project's external paper workspace
+  with its build and submission machinery. Freeze the submitted packet while
+  it is under review and freeze the camera-ready packet permanently.
+
+The content invariant is **packet ⊆ manuscript**. A packet may omit manuscript
+content to meet a venue limit, but it must not contain content absent from the
+manuscript. A frozen packet may fall behind an evolving manuscript.
+
+The manuscript leads by default: make content changes there, then port them to
+each packet in preparation. A revision request or camera-ready phase may make
+the packet lead temporarily. Back-port every packet-led change into the
+manuscript before manuscript editing resumes. Record each packet's state and
+`synced-as-of` date in `PUBLICATION.md`.
+
+When a venue accepts the manuscript format directly, create no packet. Freeze
+the submitted build separately and keep the manuscript canonical. A legacy
+external paper source may serve as the manuscript until its next major
+revision; label it `(serving as manuscript)` in `PUBLICATION.md` rather than
+creating a notebook copy as cleanup.
+
+### Default manuscript template
+
+Notebook manuscripts use Typst with
+[`arkheion`](https://typst.app/universe/package/arkheion/) `0.1.2` by default.
+Arkheion supplies a neutral author-manuscript layout rather than a venue
+template. Preserve an established project-specific Typst template when one
+already exists. Every manuscript in `papers/` cites the directory's shared
+`papers/references.bib`; do not create per-paper bibliography files.
+
+Copy `assets/lab-notebook/papers/paper.typ` when starting a manuscript. Its
+minimal shape is:
+
+```typst
+#import "@preview/arkheion:0.1.2": arkheion
+
+#show: arkheion.with(
+  title: "Working title",
+  authors: (
+    (name: "Author Name", affiliation: "Institution", email: "author@example.org"),
+  ),
+  abstract: [Write the abstract here.],
+)
+
+= Introduction
+
+#bibliography("references.bib")
+```
+
+Add `arkheion-appendices` only when the manuscript has appendices. Keep
+paper-specific diagram and citation helpers in the manuscript instead of
+turning them into another local template.
+
 Keep each claim's role and paper key in `CLAIMS.md`. `PUBLICATION.md` owns the
-paper's manuscript pointer, readiness, gates, venues, deadlines, and submission
-state. It may cite claim IDs, but it does not duplicate their role mapping.
+paper's manuscript and packet pointers, readiness, gates, venues, deadlines,
+submission state, and packet synchronization date. It may cite claim IDs, but
+it does not duplicate their role mapping.

@@ -35,6 +35,13 @@ with direct experimental evidence.
 Add optional files only when their question is current. See
 [Notebook structure](notebook-structure.md).
 
+When a project begins a manuscript, copy
+`assets/lab-notebook/papers/paper.typ` to
+`lab-notebook/papers/<paper-key>.typ` and add the shared
+`lab-notebook/papers/references.bib`. Do not add `papers/` to notebooks with no
+manuscript. See [Claims and publication tracking](publication.md) for the
+manuscript and submission-packet roles.
+
 ## Configure compute
 
 Read [Runner adapters](runner-adapters.md). Adapt the bundled `RUNNER.md`

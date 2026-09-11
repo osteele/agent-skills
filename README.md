@@ -130,7 +130,7 @@ argument. Add optional records when they have a current purpose.
 | `GLOSSARY.md` | What do project-specific terms, symbols, and acronyms mean? | Terminology needs a stable definition |
 | `BIBLIOGRAPHY.md` | Which papers matter, what do they say, and how are they relevant? | Related work is being tracked or cited |
 | `CLAIMS.md` | Which claims belong to each paper, what role do they play, and what supports them? | Baseline; initially empty |
-| `PUBLICATION.md` | What blocks each paper, and where might it go? | A paper enters active preparation |
+| `PUBLICATION.md` | Where are the manuscript and packets, when were they synchronized, what blocks submission, and where might the paper go? | A paper enters active preparation |
 | `COMPANION-DOCS.md` | Which reports, guides, presentations, or IP documents accompany the research? | Several non-paper artifacts need an index |
 | `QA.md` | Which questions should a presentation be ready to answer? | Preparing a talk or defense |
 
@@ -142,10 +142,16 @@ The directories separate records with different lifecycles:
 | `findings/` | Dated, immutable syntheses that integrate evidence across experiments. | Baseline; it may remain empty until evidence spans experiments |
 | `plans/` | Versioned contracts for bounded, multi-step research objectives. | Work spans experiments, phases, agents, or sessions |
 | `reports/` | Longer living analyses and their figures. | A synthesis is too large or too changeable for a finding |
-| `papers/` | Notebook-resident manuscripts authored by the project, plus their shared BibTeX file. | Drafting a paper inside the notebook |
+| `papers/` | Content-canonical Typst manuscripts using Arkheion by default, plus one shared `references.bib`. | Drafting a paper inside the notebook |
 | `references/` | Downloaded cited papers and source notes. PDFs are an ignored reading cache; tracked indexes and metadata may live beside them. | Archiving or annotating literature |
 | `kb/` | Stable methodology, terminology, comparisons, and other reusable project knowledge. | Material should be maintained as reference, not evidence |
 | `causal-models/` | Working mechanism hypotheses kept distinct from observed findings. | Several interventions inform one mechanism hypothesis |
+
+The manuscript remains the natural-length source through arXiv revisions,
+review, and publication. A venue submission packet is a constrained derivative
+created only for a specific submission. It may omit manuscript content, but it
+cannot add content absent from the manuscript. `PUBLICATION.md` records each
+packet's state and `synced-as-of` date.
 
 Each experiment keeps its a priori predictions next to observed outcomes, and
 names each quantity it measures as an estimand whose registration status is

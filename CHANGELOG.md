@@ -13,6 +13,15 @@
 - The site contract check targets the standalone Research Notebook
   documentation site.
 
+### Publications
+
+- Notebook manuscripts are content-canonical Typst sources that use Arkheion
+  by default and share one `papers/references.bib`.
+- Venue submission packets are constrained derivatives. The publication record
+  tracks their state and synchronization with the evolving manuscript.
+- The bundled optional `papers/` assets provide the default manuscript source
+  and shared bibliography.
+
 ## v0.2.0
 
 Notebook schema 5. A notebook that validated under schema 4 may report new

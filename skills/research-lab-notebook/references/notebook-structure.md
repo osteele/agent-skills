@@ -20,7 +20,7 @@ project/
       2026-08-10-cross-experiment-result.md
     plans/                  # optional multi-step research plans
     reports/                # optional living syntheses
-    papers/                 # optional manuscripts authored by the project
+    papers/                 # optional canonical Typst manuscripts and shared bibliography
     references/             # optional cited-paper cache and tracked source notes
     kb/                     # optional stable reference material
     causal-models/          # optional working mechanism hypotheses
@@ -40,7 +40,9 @@ reproduce the run.
 - Add `RUNNER.md` when the project submits or processes jobs through a runner.
 - Add `reports/` for a living analysis that does not fit one experiment or one
   immutable finding.
-- Add `papers/` for notebook-resident manuscripts authored by the project.
+- Add `papers/` for notebook-resident, content-canonical manuscripts authored
+  by the project. New manuscripts use the Arkheion Typst template and share
+  `papers/references.bib`; venue submission packets live outside the notebook.
 - Add `references/` and `BIBLIOGRAPHY.md` when tracking cited work. Ignore
   `references/**/*.pdf`, not the whole directory, so indexes and source notes
   remain trackable.
