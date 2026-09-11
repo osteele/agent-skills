@@ -64,6 +64,10 @@ explain its recorded design and terminal state without implying work remains
 authorized. Disclose absent designs, cost estimates, or evidence rather than
 filling them in as facts. A preview does not acquire execution ownership,
 change statuses or `next_action`, launch jobs, or generate missing evidence.
+Discuss retained cost estimates and discrepancies as part of the preview.
+Do not reconcile accounting records, retrieve missing evidence through a new
+job, or change approvals. Banking a proposed correction requires separate
+write authorization.
 
 ## Execution modes
 
@@ -106,6 +110,16 @@ it does not waive later gates.
    and the preregistration before outcome inspection. An agent's own review is
    not human approval. If a required decision or permission is absent, stop at
    that boundary; a mode selection is not approval.
+   Before each submission or retry, check the plan's
+   [Budget and accounting](plans.md#budget-and-accounting): the approved scope,
+   dated limits, available incurred evidence, and nonoverlapping A + C + U
+   forecast. C includes only the additional remainder of running or submitted
+   work. Headroom after commitments must still cover planned U; an underspend
+   grants no new scope. Use a conservative admission bound for concurrent jobs
+   and permitted retries, coordinate reservations against shared limits, and
+   check which limits the runner actually enforces. Stop when exposure exceeds
+   approval or material unknowns prevent bounding it. Preserve controls,
+   uncertainty, and independent confirmation when proposing a cheaper design.
 3. Execute only eligible work. Follow [Experiments](experiments.md) for
    registration, instrument checks, pilots, and run identity. Apply the
    predeclared decision rules to positive, null, and failed outcomes alike.
@@ -116,6 +130,11 @@ it does not waive later gates.
    analysis and interpretation before synthesis or publication use. A proposed
    follow-up, including one selected by a decision rule, requires the human
    approval specified by the notebook before submission.
+   Capture available per-attempt cost evidence and unresolved billing before
+   the durable update and processed mark. Scientific processing can close with
+   billing pending if its gaps and follow-up owner are recorded. Refresh the
+   plan's dated rollup without adding interim estimates and later bills for the
+   same usage.
 5. Report according to the selected mode. In stepped mode, first explain the
    original rationale, setup, controls, predictions, and null criterion; then
    present observed results, deviations, interpretation, and the proposed next
@@ -130,6 +149,11 @@ it does not waive later gates.
    pointers. Account for running jobs and artifact durability; a conversational
    pause does not cancel a job or authorize leaving additional work running.
    Do not mark an unfinished plan completed merely because the session ended.
+   Reconcile against the original baseline and link cost sources, variance,
+   remaining commitments, and pending settlement. Reduce a canceled job's
+   remaining commitment only after confirmation; retain fees and billing
+   unknowns. Carry revised assumptions into any proposed successor without
+   launching it.
 
 Every mode preserves the same scientific and permission boundaries. If work
 cannot continue, record the exact blocker and the decision needed to resume.
@@ -176,6 +200,9 @@ Missing evidence remains a disclosed gap. Do not acquire execution ownership,
 mark jobs processed, change plan or experiment state, or bank review corrections
 unless the user separately authorizes those writes. Authorized corrections
 must preserve the original record and must not retrofit preregistration.
+Existing costs and accounting discrepancies may be discussed in a walkthrough.
+Reconciliation writes and billing corrections require separate authorization,
+just as scientific corrections do.
 
 If the user explicitly requests **run-then-replay**, execute in a named
 execution mode first, within all existing gates. Then enter the read-only

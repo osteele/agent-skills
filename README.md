@@ -215,6 +215,29 @@ and history across providers and sessions. Native planning modes remain useful
 for creating or executing a notebook plan. See the [plan
 specification](skills/research-lab-notebook/references/plans.md).
 
+### Cost-aware planning and accounting
+
+Choose the cheapest instrument sufficient for the decision: existing-data
+analysis, checks, a pilot, full measurement, or independent confirmation.
+Preserve controls and valid uncertainty. The
+[cost guide](https://research-notebook.osteele.com/guide/costs/) follows one
+fictional campaign from estimate through final billing.
+
+Use optional human-readable
+[Budget and accounting](skills/research-lab-notebook/references/plans.md#budget-and-accounting)
+notes in the plan for estimates, approved limits, and linked as-of rollups.
+Keep per-attempt sources and corrections in the experiment's
+[Cost and resources](skills/research-lab-notebook/references/experiments.md#cost-and-resources).
+Forecasts separate incurred cost, the additional remainder of submitted work,
+and planned work not yet committed. Unknown charges remain visible; later
+bills replace estimates for the same usage rather than adding duplicate spend.
+
+Money, compute quantity, elapsed time, and human effort stay separate. Budget
+headroom grants no new scope or spending permission. Scientific processing can
+finish with billing pending when the available evidence and follow-up owner
+are recorded. These conventions add no accounting ledger, required schema
+fields, validator checks, or runtime budget enforcement.
+
 ### Choose execution or read-only review
 
 Use ordinary language to name the installed skill, plan path, and mode. For
@@ -263,6 +286,12 @@ This mapping is called a runner adapter. It tells the agent how to:
 4. cancel a job when authorized;
 5. determine whether a completed job has been processed; and
 6. mark processing complete only after notebook updates are durable.
+
+`RUNNER.md` also maps supported usage and billing sources and their limitations.
+Record available cost evidence and unresolved billing before the durable
+update and processed mark. A processed job can still await financial settlement;
+the [runner reference](skills/research-lab-notebook/references/job-runners.md#usage-and-billing-sources)
+explains provenance, shared charges, and corrections.
 
 ### Runner comparison
 

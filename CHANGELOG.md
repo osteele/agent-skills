@@ -4,6 +4,13 @@
 
 ### Changed
 
+- Optional plan `Budget and accounting` and experiment `Cost and resources`
+  conventions cover cost-aware design choices, estimates, approved limits,
+  attempt-level provenance, nonoverlapping forecasts, and billing reconciliation.
+  Runner and processing guidance preserve billing gaps and distinguish scientific
+  completion from financial settlement. See the
+  [cost guide](https://research-notebook.osteele.com/guide/costs/).
+  Notebook schema remains 6; these prose conventions add no runtime enforcement.
 - The project is published as Research Notebook System at
   `osteele/research-notebook`. Install commands use the new repository name;
   the two skill names are unchanged.

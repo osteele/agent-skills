@@ -1,6 +1,6 @@
 ---
 name: research-lab-notebook
-description: Set up and operate a durable, file-based research lab notebook with questions, priorities, experiments, registered estimands, preregistered predictions, job results, findings, plans, claims, and publication tracking. Use when creating or adapting a lab-notebook/ directory, editing its records, registering or processing experiments, previewing or executing an authorized bounded plan, walking through or replaying existing results without execution, connecting a local process or job system such as Dagu, Pueue, SkyPilot, Slurm, or Weft, or handing research work across agents and sessions.
+description: Set up and operate a durable, file-based research lab notebook with questions, priorities, experiments, registered estimands, preregistered predictions, job results, findings, plans, claims, and publication tracking. Use when creating or adapting a lab-notebook/ directory, editing its records, registering or processing experiments, estimating or reconciling research costs, previewing or executing an authorized bounded plan, walking through or replaying existing results without execution, connecting a local process or job system such as Dagu, Pueue, SkyPilot, Slurm, or Weft, or handing research work across agents and sessions.
 ---
 
 # Research lab notebook
@@ -23,6 +23,7 @@ Read the matching reference before acting:
 | Analyze results or state a conclusion | [Research methodology](references/research-methodology.md) |
 | Write a cross-experiment synthesis | [Findings](references/findings.md) |
 | Create, resume, or close a plan | [Plans](references/plans.md) |
+| Compare research costs, estimate a budget, or reconcile spending | [Plan budget and accounting](references/plans.md#budget-and-accounting), [Experiment cost and resources](references/experiments.md#cost-and-resources), and [Usage and billing sources](references/job-runners.md#usage-and-billing-sources) |
 | Preview or execute a plan; walk through or replay existing results | [Plan execution and read-only review](references/plan-execution.md) |
 | Curate claims or publication readiness | [Publication](references/publication.md) |
 | Adapt a compute backend | [Runner adapters](references/runner-adapters.md) and, when needed, [Processed-job ledger](references/processed-job-ledger.md) |
@@ -86,11 +87,16 @@ these activities are not standalone CLI commands.
 - Update indexes and status pages with pointers instead of copied conclusions.
 - Use a plan as a bounded research contract. Execution still requires the
   authority appropriate to each action.
+- Keep estimates, approvals, and linked as-of rollups in plans; keep per-attempt
+  cost evidence and corrections in experiments. Preserve unknown billing,
+  count shared charges once, and never treat headroom as new scope approval.
 
 ## After writing
 
 1. Update the relevant experiment or finding index and affected question,
    priority, claim, and publication pointers.
+   When processing job results, capture available cost evidence and billing gaps
+   before validation.
 2. Add a changelog entry only for a result, decision, failure, consolidation, or
    publication milestone.
 3. Run the bundled structural validator:
@@ -105,9 +111,10 @@ these activities are not standalone CLI commands.
 
 4. Make the update durable in the notebook's version-control boundary.
 5. Mark a job processed only after its outputs are checked, the notebook update
-   passes validation, and the durable write succeeds. A run on the local
-   machine has no processed flag and its output may be the only copy; record
-   its numbers before anything can overwrite them.
+   passes validation, and the durable write succeeds. Billing may remain
+   pending with an explicit follow-up owner; processed is not financially
+   settled. A local run has no processed flag and its output may be the only
+   copy; record its numbers before anything can overwrite them.
 6. When a value is corrected, state the superseded value beside the new one and
    search the notebook for both the old value and the experiment ID, so
    findings and terminal plans that relied on it get their pointer or
